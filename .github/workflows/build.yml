@@ -47,22 +47,27 @@ jobs:
       - name: Capacitor sync
         run: npx cap sync android
 
-      - name: Patch AndroidManifest
+      - name: Patch AndroidManifest — Android 13/14/15
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
+          # Remove duplicates
           sed -i '/<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE/d' "$MANIFEST"
           sed -i '/<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE/d' "$MANIFEST"
           sed -i '/<uses-permission android:name="android.permission.READ_MEDIA/d' "$MANIFEST"
-          sed -i 's|</manifest>|    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>\n    <queries>\n        <intent>\n            <action android:name="android.intent.action.GET_CONTENT"/>\n        </intent>\n    </queries>\n</manifest>|' "$MANIFEST"
-          echo "=== Manifest ==="
+          sed -i '/<uses-permission android:name="android.permission.READ_MEDIA_VISUAL/d' "$MANIFEST"
+          # Inject correct permissions before </manifest>
+          sed -i 's|</manifest>|    <!-- Android 6-12 -->\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>\n    <!-- Android 13+ -->\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <!-- Android 14+ partial access -->\n    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/>\n</manifest>|' "$MANIFEST"
+          echo "=== AndroidManifest.xml ==="
           cat "$MANIFEST"
 
-      - name: Patch build.gradle
+      - name: Patch build.gradle — SDK versions
         run: |
           GRADLE="android/app/build.gradle"
-          sed -i 's/compileSdkVersion .*/compileSdkVersion 34/' "$GRADLE"
-          sed -i 's/targetSdkVersion .*/targetSdkVersion 34/' "$GRADLE"
+          sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' "$GRADLE"
+          sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' "$GRADLE"
           sed -i 's/minSdkVersion .*/minSdkVersion 26/' "$GRADLE"
+          echo "=== build.gradle ==="
+          grep -E "compileSdk|targetSdk|minSdk" "$GRADLE"
 
       - name: Build Debug APK
         run: |
@@ -89,12 +94,12 @@ jobs:
           tag_name: v1.0.${{ github.run_number }}
           name: "SwipeShot v1.0.${{ github.run_number }}"
           body: |
-            ## 🎴 SwipeShot — Todas las fotos automáticamente
+            ## 🎴 SwipeShot — Android 13/14/15
 
             1. Descarga el `.apk`
             2. Instala (permite fuentes desconocidas)
             3. Acepta permiso de fotos al abrir
-            4. ¡Todas tus fotos aparecen solas!
+            4. ¡Todas tus fotos aparecen automáticamente!
           files: output/SwipeShot-v${{ github.run_number }}.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

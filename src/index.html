@@ -18,50 +18,37 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
   user-select:none;-webkit-user-select:none;}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;
   padding-top:var(--safe-top);padding-bottom:var(--safe-bot);}
-
-/* Progress */
 #pw{height:3px;background:var(--surface2);flex-shrink:0;}
 #pb{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s;}
-
-/* Header */
 header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 8px;flex-shrink:0;}
 .logo{font-size:1.35rem;font-weight:800;letter-spacing:-.5px;
   background:linear-gradient(130deg,var(--accent),var(--accent2));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .hr{display:flex;gap:10px;align-items:center;}
 .pill{display:flex;align-items:center;gap:6px;background:var(--surface2);
-  border:1px solid var(--border);border-radius:40px;padding:5px 12px;
-  font-size:.72rem;color:var(--muted);}
+  border:1px solid var(--border);border-radius:40px;padding:5px 12px;font-size:.72rem;color:var(--muted);}
 .pill b{color:var(--text);font-weight:700;}
 .ibtn{width:38px;height:38px;border-radius:50%;background:var(--surface2);
   border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
   font-size:1.05rem;cursor:pointer;position:relative;transition:transform .15s;}
 .ibtn:active{transform:scale(.88);}
 .badge{position:absolute;top:-3px;right:-3px;background:var(--del);color:#fff;
-  font-size:.58rem;font-weight:800;border-radius:10px;padding:1px 4px;
-  min-width:15px;text-align:center;display:none;}
+  font-size:.58rem;font-weight:800;border-radius:10px;padding:1px 4px;min-width:15px;text-align:center;display:none;}
 .badge.on{display:block;}
-
-/* Deck */
 #deck{flex:1;display:flex;align-items:center;justify-content:center;
   position:relative;overflow:hidden;padding:4px 14px 0;}
-
-/* Cards */
 .card{position:absolute;width:min(340px,90vw);height:min(500px,65vh);
-  border-radius:var(--radius);overflow:hidden;cursor:grab;
-  transform-origin:50% 115%;will-change:transform;
-  box-shadow:0 10px 50px rgba(0,0,0,.7);border:1px solid var(--border);}
+  border-radius:var(--radius);overflow:hidden;cursor:grab;transform-origin:50% 115%;
+  will-change:transform;box-shadow:0 10px 50px rgba(0,0,0,.7);border:1px solid var(--border);}
 .card:active{cursor:grabbing;}
 .card.top{z-index:5;box-shadow:0 18px 70px rgba(0,0,0,.8),0 0 0 1px rgba(124,92,252,.15);}
 .card:nth-child(2){transform:scale(.95) translateY(14px);z-index:4;}
 .card:nth-child(3){transform:scale(.91) translateY(26px);z-index:3;}
 .card:nth-child(n+4){transform:scale(.88) translateY(36px);z-index:2;opacity:0;}
-.card-img{width:100%;height:100%;object-fit:cover;display:block;
-  background:var(--surface2);pointer-events:none;transition:filter .3s;}
+.card-img{width:100%;height:100%;object-fit:cover;display:block;background:var(--surface2);pointer-events:none;transition:filter .3s;}
 .card-img.blur{filter:blur(8px);transform:scale(1.05);}
 .card-ov{position:absolute;inset:0;
-  background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,.3) 65%,rgba(0,0,0,.92) 100%);
-  pointer-events:none;}
+  background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,.3) 65%,rgba(0,0,0,.92) 100%);pointer-events:none;}
 .card-ctr{position:absolute;top:14px;right:14px;background:rgba(0,0,0,.55);
   border-radius:20px;padding:4px 10px;font-size:.7rem;color:#fff;font-weight:700;}
 .card-info{position:absolute;bottom:0;left:0;right:0;padding:36px 18px 18px;pointer-events:none;}
@@ -72,69 +59,49 @@ header{display:flex;align-items:center;justify-content:space-between;padding:12p
 .s-keep{top:24px;left:16px;color:var(--keep);border-color:var(--keep);transform:rotate(-12deg);}
 .s-del{top:24px;right:16px;color:var(--del);border-color:var(--del);transform:rotate(12deg);}
 .s-skip{top:44%;left:50%;transform:translate(-50%,-50%);color:var(--skip);border-color:var(--skip);}
-
-/* Actions */
-#actions{display:flex;align-items:center;justify-content:center;
-  gap:16px;padding:12px 20px 16px;flex-shrink:0;}
-.act{border:none;border-radius:50%;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:transform .15s;}
+#actions{display:flex;align-items:center;justify-content:center;gap:16px;padding:12px 20px 16px;flex-shrink:0;}
+.act{border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s;}
 .act:active{transform:scale(.85);}
-.act-del{width:60px;height:60px;font-size:1.6rem;
-  background:linear-gradient(135deg,#ff3d5a,#c0192f);box-shadow:0 6px 22px rgba(255,61,90,.45);}
-.act-keep{width:68px;height:68px;font-size:1.9rem;
-  background:linear-gradient(135deg,#1fd07a,#0b8f4e);box-shadow:0 6px 22px rgba(31,208,122,.45);}
+.act-del{width:60px;height:60px;font-size:1.6rem;background:linear-gradient(135deg,#ff3d5a,#c0192f);box-shadow:0 6px 22px rgba(255,61,90,.45);}
+.act-keep{width:68px;height:68px;font-size:1.9rem;background:linear-gradient(135deg,#1fd07a,#0b8f4e);box-shadow:0 6px 22px rgba(31,208,122,.45);}
 .act-skip{width:50px;height:50px;font-size:1.2rem;background:var(--surface2);border:1.5px solid var(--border);}
 .act-undo{width:44px;height:44px;font-size:1rem;background:var(--surface2);border:1.5px solid var(--border);}
-
-/* States */
-#loader,#empty,#perm{display:none;flex-direction:column;
-  align-items:center;justify-content:center;gap:16px;flex:1;text-align:center;padding:24px;}
-.spinner{width:46px;height:46px;border:3px solid var(--border);
-  border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite;}
+#loader,#empty,#perm{display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;flex:1;text-align:center;padding:24px;}
+.spinner{width:46px;height:46px;border:3px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .75s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.state-icon{font-size:3.2rem;}
-.state-title{font-size:1.35rem;font-weight:800;}
-.state-sub{color:var(--muted);font-size:.9rem;line-height:1.5;max-width:270px;}
-#loader-msg{color:var(--muted);font-size:.9rem;}
-.btn-main{background:var(--accent);color:#fff;border:none;border-radius:40px;
+.si{font-size:3.2rem;}.st{font-size:1.35rem;font-weight:800;}
+.ss{color:var(--muted);font-size:.9rem;line-height:1.5;max-width:270px;}
+#lmsg{color:var(--muted);font-size:.9rem;}
+.bmain{background:var(--accent);color:#fff;border:none;border-radius:40px;
   padding:14px 32px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:4px;}
-.btn-main:active{opacity:.8;}
-.btn-sec{background:transparent;color:var(--accent);border:1.5px solid var(--accent);
-  border-radius:40px;padding:11px 24px;font-size:.85rem;font-weight:700;cursor:pointer;}
-
-/* Fly */
+.bmain:active{opacity:.8;}
+.bsec{background:transparent;color:var(--muted);border:1px solid var(--border);
+  border-radius:40px;padding:10px 20px;font-size:.8rem;cursor:pointer;}
 .fly-r{animation:flyR .4s cubic-bezier(.5,0,1,.9) forwards;}
 .fly-l{animation:flyL .4s cubic-bezier(.5,0,1,.9) forwards;}
 .fly-u{animation:flyU .4s cubic-bezier(.5,0,1,.9) forwards;}
 @keyframes flyR{to{transform:translateX(130vw) rotate(28deg);opacity:0;}}
 @keyframes flyL{to{transform:translateX(-130vw) rotate(-28deg);opacity:0;}}
 @keyframes flyU{to{transform:translateY(-110vh);opacity:0;}}
-
-/* Sheet */
-.sheet-bg{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.75);
-  opacity:0;pointer-events:none;transition:opacity .25s;}
-.sheet-bg.on{opacity:1;pointer-events:all;}
+.sbg{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.75);opacity:0;pointer-events:none;transition:opacity .25s;}
+.sbg.on{opacity:1;pointer-events:all;}
 .sheet{position:absolute;bottom:0;left:0;right:0;background:var(--surface);
   border-radius:26px 26px 0 0;border:1px solid var(--border);border-bottom:none;
   max-height:88vh;display:flex;flex-direction:column;
-  transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1.1,.7,1);
-  padding-bottom:var(--safe-bot);}
-.sheet-bg.on .sheet{transform:translateY(0);}
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1.1,.7,1);padding-bottom:var(--safe-bot);}
+.sbg.on .sheet{transform:translateY(0);}
 .handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:12px auto 0;flex-shrink:0;}
 .sh{display:flex;align-items:center;justify-content:space-between;
   padding:14px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
 .sh h2{font-size:1.05rem;font-weight:800;}
-.xbtn{width:30px;height:30px;background:var(--surface2);border:1px solid var(--border);
-  border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:.85rem;cursor:pointer;}
-.sb{flex:1;overflow-y:auto;padding:14px 14px 0;overscroll-behavior:contain;}
+.xb{width:30px;height:30px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;cursor:pointer;}
+.sbd{flex:1;overflow-y:auto;padding:14px 14px 0;overscroll-behavior:contain;}
 .sf{padding:12px 14px 16px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0;}
-.btn-danger{flex:1;background:var(--del);color:#fff;border:none;border-radius:14px;
-  padding:13px;font-size:.88rem;font-weight:700;cursor:pointer;}
-.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);
-  border-radius:14px;padding:13px 18px;font-size:.88rem;font-weight:600;cursor:pointer;}
-
-/* Trash */
+.bdanger{flex:1;background:var(--del);color:#fff;border:none;border-radius:14px;padding:13px;font-size:.88rem;font-weight:700;cursor:pointer;}
+.bghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:14px;padding:13px 18px;font-size:.88rem;font-weight:600;cursor:pointer;}
 .tgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
 .tc{background:var(--surface2);border-radius:16px;overflow:hidden;border:1px solid var(--border);}
 .tc img{width:100%;aspect-ratio:1;object-fit:cover;background:var(--surface);}
@@ -142,13 +109,11 @@ header{display:flex;align-items:center;justify-content:space-between;padding:12p
 .tn{font-size:.72rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .td{font-size:.65rem;color:var(--muted);margin-top:2px;}
 .dr{color:var(--del)!important;}
-.btn-restore{width:100%;margin-top:7px;background:transparent;border:1px solid var(--accent);
+.bres{width:100%;margin-top:7px;background:transparent;border:1px solid var(--accent);
   border-radius:9px;padding:5px 0;font-size:.72rem;font-weight:700;color:var(--accent);cursor:pointer;}
-.btn-restore:active{background:var(--accent);color:#fff;}
-.tempty{text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem;}
-.tempty span{font-size:2.4rem;display:block;margin-bottom:10px;}
-
-/* Toast */
+.bres:active{background:var(--accent);color:#fff;}
+.tem{text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem;}
+.tem span{font-size:2.4rem;display:block;margin-bottom:10px;}
 #toasts{position:fixed;top:calc(var(--safe-top) + 60px);left:50%;transform:translateX(-50%);
   z-index:200;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
 .toast{background:var(--surface2);border:1px solid var(--border);border-radius:40px;
@@ -169,57 +134,52 @@ header{display:flex;align-items:center;justify-content:space-between;padding:12p
   <header>
     <div class="logo">🎴 SwipeShot</div>
     <div class="hr">
-      <div class="pill">📷 <b id="s-left">–</b>&nbsp;✅ <b id="s-kept">–</b></div>
-      <div class="ibtn" id="trash-btn">🗑️<span class="badge" id="badge"></span></div>
+      <div class="pill">📷 <b id="sl">–</b>&nbsp;✅ <b id="sk">–</b></div>
+      <div class="ibtn" id="tbtn">🗑️<span class="badge" id="badge"></span></div>
     </div>
   </header>
 
-  <!-- Permission -->
   <div id="perm">
-    <div class="state-icon">📸</div>
-    <div class="state-title">Bienvenido a SwipeShot</div>
-    <div class="state-sub">Necesitamos permiso para acceder a tus fotos y mostrártelas todas.</div>
-    <button class="btn-main" id="perm-btn">Conceder permiso y empezar</button>
+    <div class="si">📸</div>
+    <div class="st">SwipeShot</div>
+    <div class="ss">Para ver tus fotos necesitamos permiso de acceso a la galería.</div>
+    <button class="bmain" id="pbtn">Conceder permiso y empezar</button>
+    <button class="bsec" id="sbtn" style="display:none">🔄 Reintentar</button>
   </div>
 
-  <!-- Loader -->
   <div id="loader">
     <div class="spinner"></div>
-    <p id="loader-msg">Cargando tus fotos…</p>
+    <p id="lmsg">Cargando fotos…</p>
   </div>
 
-  <!-- Deck -->
   <div id="deck" style="display:none"></div>
 
-  <!-- Empty -->
   <div id="empty" style="display:none">
-    <div class="state-icon">🎉</div>
-    <div class="state-title">¡Todo revisado!</div>
-    <div class="state-sub">No quedan más fotos por revisar.</div>
-    <button class="btn-main" id="reload-btn">🔄 Revisar de nuevo</button>
+    <div class="si">🎉</div>
+    <div class="st">¡Todo revisado!</div>
+    <div class="ss" id="emsg">No quedan más fotos por revisar.</div>
+    <button class="bmain" id="rbtn">🔄 Revisar de nuevo</button>
   </div>
 
-  <!-- Actions -->
   <div id="actions" style="display:none">
-    <button class="act act-undo" id="undo-btn">↩️</button>
-    <button class="act act-del"  id="del-btn">🗑</button>
-    <button class="act act-keep" id="keep-btn">💚</button>
-    <button class="act act-skip" id="skip-btn">⏭</button>
+    <button class="act act-undo" id="ubtn">↩️</button>
+    <button class="act act-del"  id="dbtn">🗑</button>
+    <button class="act act-keep" id="kbtn">💚</button>
+    <button class="act act-skip" id="xsbtn">⏭</button>
   </div>
 </div>
 
-<!-- Trash sheet -->
-<div class="sheet-bg" id="tsheet">
+<div class="sbg" id="tsheet">
   <div class="sheet">
     <div class="handle"></div>
     <div class="sh">
       <h2>🗑️ Papelera <span id="tsub" style="color:var(--muted);font-weight:400;font-size:.85rem;"></span></h2>
-      <div class="xbtn" id="xtrash">✕</div>
+      <div class="xb" id="xt">✕</div>
     </div>
-    <div class="sb" id="tbody"></div>
+    <div class="sbd" id="tbody"></div>
     <div class="sf">
-      <button class="btn-ghost" id="xtrash2">Cerrar</button>
-      <button class="btn-danger" id="purge-btn">Vaciar todo</button>
+      <button class="bghost" id="xt2">Cerrar</button>
+      <button class="bdanger" id="purgebtn">Vaciar todo</button>
     </div>
   </div>
 </div>
@@ -230,136 +190,121 @@ header{display:flex;align-items:center;justify-content:space-between;padding:12p
 <script>
 'use strict';
 
-const CAP    = !!window.Capacitor?.isNativePlatform?.();
-const Prefs  = window.Capacitor?.Plugins?.Preferences;
-const Media  = window.Capacitor?.Plugins?.Media;
+const CAP   = !!window.Capacitor?.isNativePlatform?.();
+const Prefs = window.Capacitor?.Plugins?.Preferences;
+const CMS   = window.Capacitor?.Plugins?.CapacitorMediaStore;
 
-const META_KEY   = 'swipeshot_v3';
-const RETAIN_MS  = 7 * 86_400_000;
+const META_KEY  = 'swipeshot_v4';
+const RETAIN_MS = 7*86_400_000;
 
-let images  = [];
-let idx     = 0;
-let history = [];
-let meta    = { deleted:{}, kept:new Set(), skipped:new Set() };
+let images=[], idx=0, history=[];
+let meta={deleted:{},kept:new Set(),skipped:new Set()};
 
 // ── Boot ──────────────────────────────────────────────────
-async function boot() {
-  showState('loader');
-  setMsg('Iniciando…');
-  await loadMeta();
-  purgeExpired();
+async function boot(){
+  showState('loader');setMsg('Iniciando…');
+  await loadMeta();purgeExpired();
+  if(!CAP){await demoBoot();return;}
+  await requestAndLoad();
+}
 
-  if (!CAP) { await demoBoot(); return; }
-
-  // Check/request permission via Media plugin
-  try {
-    const perm = await Media.getMedias({ quantity: 1, thumbnailWidth: 10, thumbnailHeight: 10, thumbnailQuality: 10 });
-    // If we got here, permission already granted
-    await loadAllPhotos();
-  } catch(e) {
-    // No permission yet — show permission screen
-    showState('perm');
+async function requestAndLoad(){
+  setMsg('Solicitando permiso…');
+  try{
+    // Request permissions via CapacitorMediaStore
+    const perm = await CMS.requestPermissions({types:['image']});
+    console.log('Perm result:',JSON.stringify(perm));
+    if(perm.readMediaImages==='granted'||perm.photos==='granted'||perm.storage==='granted'||perm.granted===true){
+      await loadPhotos();
+    } else {
+      showPermError('Permiso denegado. Ve a Ajustes → Aplicaciones → SwipeShot → Permisos → Fotos y actívalo.');
+    }
+  } catch(e){
+    console.error('Perm error:',e);
+    // Try loading anyway — some versions grant without explicit request
+    try{
+      await loadPhotos();
+    } catch(e2){
+      showPermError('No se pudo acceder a la galería.\nError: '+e2.message);
+    }
   }
 }
 
-document.getElementById('perm-btn').onclick = async () => {
-  showState('loader');
-  setMsg('Solicitando permiso…');
-  try {
-    await loadAllPhotos();
-  } catch(e) {
-    toast('Permiso denegado. Ve a Ajustes → Aplicaciones → SwipeShot → Permisos', 'd');
-    showState('perm');
-  }
-};
-
-// ── Load all photos via @capacitor-community/media ────────
-async function loadAllPhotos() {
+async function loadPhotos(){
   setMsg('Cargando tus fotos…');
-  try {
-    // Get all photos from gallery
-    const result = await Media.getMedias({
-      quantity: 9999,
-      thumbnailWidth: 400,
-      thumbnailHeight: 600,
-      thumbnailQuality: 80,
-      types: 'images',
-      albumIdentifier: undefined,
+  try{
+    const result = await CMS.getMediasByType({
+      mediaType:'image',
+      sortBy:'DATE_ADDED',
+      limit:5000,
     });
+    const items = result.files ?? result.medias ?? result.media ?? [];
+    setMsg(`Encontradas ${items.length} fotos…`);
 
-    const mediaItems = result.medias ?? [];
-    setMsg(`Encontradas ${mediaItems.length} fotos…`);
-
-    const deletedSet = new Set(Object.keys(meta.deleted));
-
-    images = mediaItems
-      .filter(m => !deletedSet.has(m.identifier) && !meta.kept.has(m.identifier) && !meta.skipped.has(m.identifier))
-      .map(m => ({
-        id:        m.identifier,
-        name:      m.fileName ?? 'foto.jpg',
-        size:      m.size ?? 0,
-        blobUrl:   m.thumbnailPath ?? m.path,
-        fullPath:  m.path,
-        createdAt: m.creationDate,
+    const del=new Set(Object.keys(meta.deleted));
+    images = items
+      .filter(m=>{
+        const id=m.id??m.identifier??m.path;
+        return !del.has(id)&&!meta.kept.has(id)&&!meta.skipped.has(id);
+      })
+      .map(m=>({
+        id:    m.id??m.identifier??m.path,
+        name:  m.name??m.fileName??m.displayName??'foto.jpg',
+        size:  m.size??0,
+        uri:   m.uri??m.contentUri??m.path??'',
+        date:  m.dateAdded??m.creationDate??0,
       }));
 
-    // Sort newest first
-    images.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+    images.sort((a,b)=>b.date-a.date);
+    idx=0;history=[];
 
-    idx = 0; history = [];
-
-    if (images.length === 0) {
+    if(!images.length){
       showState('empty');
-      document.querySelector('#empty .state-sub').textContent =
-        'Todas las fotos ya fueron revisadas o no hay imágenes en la galería.';
+      document.getElementById('emsg').textContent='Todas las fotos ya fueron revisadas.';
       return;
     }
-
     render();
-  } catch(e) {
-    console.error(e);
-    throw e;
+  } catch(e){
+    console.error('Load error:',e);
+    showPermError('Error al leer fotos: '+e.message);
   }
 }
 
-// ── Demo (browser) ────────────────────────────────────────
-async function demoBoot() {
-  images = Array.from({length:20},(_,i)=>({
-    id:`demo_${i}`,
-    name:`foto_${String(i+1).padStart(3,'0')}.jpg`,
-    size: Math.round(Math.random()*4e6+5e5),
-    blobUrl:`https://picsum.photos/seed/${i+30}/400/600`,
-    fullPath:'',createdAt:Date.now()-i*86400000,
+function showPermError(msg){
+  showState('perm');
+  document.querySelector('#perm .ss').textContent=msg;
+  document.getElementById('sbtn').style.display='block';
+}
+
+// ── Demo browser ──────────────────────────────────────────
+async function demoBoot(){
+  images=Array.from({length:20},(_,i)=>({
+    id:`d${i}`,name:`foto_${i+1}.jpg`,size:Math.round(Math.random()*4e6+5e5),
+    uri:`https://picsum.photos/seed/${i+40}/400/600`,date:Date.now()-i*86400000,
   }));
-  idx=0;history=[];
-  render();
+  idx=0;history=[];render();
 }
 
 // ── Meta ──────────────────────────────────────────────────
-async function loadMeta() {
+async function loadMeta(){
   if(!CAP){meta={deleted:{},kept:new Set(),skipped:new Set()};return;}
   try{
     const r=await Prefs.get({key:META_KEY});
-    if(r.value){
-      const d=JSON.parse(r.value);
-      meta={deleted:d.deleted??{},kept:new Set(d.kept??[]),skipped:new Set(d.skipped??[])};
-    }
+    if(r.value){const d=JSON.parse(r.value);
+      meta={deleted:d.deleted??{},kept:new Set(d.kept??[]),skipped:new Set(d.skipped??[])};}
   }catch{meta={deleted:{},kept:new Set(),skipped:new Set()};}
 }
-
 async function saveMeta(){
   if(!CAP)return;
   try{await Prefs.set({key:META_KEY,value:JSON.stringify({
-    deleted:meta.deleted,kept:[...meta.kept],skipped:[...meta.skipped]
-  })});}catch{}
+    deleted:meta.deleted,kept:[...meta.kept],skipped:[...meta.skipped]})});}catch{}
 }
-
 function purgeExpired(){
-  const now=Date.now();let changed=false;
+  const now=Date.now();let ch=false;
   for(const[k,v]of Object.entries(meta.deleted)){
-    if(v.deletedAt+RETAIN_MS<now){delete meta.deleted[k];changed=true;}
+    if(v.deletedAt+RETAIN_MS<now){delete meta.deleted[k];ch=true;}
   }
-  if(changed)saveMeta();
+  if(ch)saveMeta();
 }
 
 // ── Render ────────────────────────────────────────────────
@@ -379,61 +324,50 @@ function render(){
 function buildCard(img,isTop){
   const card=document.createElement('div');
   card.className='card'+(isTop?' top':'');
-  card.dataset.id=img.id;
-
   const el=document.createElement('img');
-  el.className='card-img blur';
-  el.draggable=false;
+  el.className='card-img blur';el.draggable=false;
   el.onload=()=>el.classList.remove('blur');
   el.onerror=()=>{el.style.background='#1a1a2e';el.classList.remove('blur');};
-  el.src=img.blobUrl;
-
+  el.src=img.uri;
   const ov=document.createElement('div');ov.className='card-ov';
   const ctr=document.createElement('div');ctr.className='card-ctr';
-  ctr.textContent=`${idx+1} / ${images.length}`;
+  ctr.textContent=`${idx+1}/${images.length}`;
   const info=document.createElement('div');info.className='card-info';
   info.innerHTML=`<div class="card-name">${esc(img.name)}</div>
-    <div class="card-meta">${fmtSize(img.size)} · ${fmtDate(img.createdAt)}</div>`;
-
+    <div class="card-meta">${fmtSize(img.size)} · ${fmtDate(img.date)}</div>`;
   const sk=mkS('s-keep','💚 GUARDAR');
   const sd=mkS('s-del','BORRAR 🗑');
   const ss=mkS('s-skip','⏭ SALTAR');
   card.append(el,ov,ctr,info,sk,sd,ss);
   return card;
 }
-
-function mkS(cls,text){
-  const s=document.createElement('div');
-  s.className=`stamp ${cls}`;s.textContent=text;return s;
-}
+function mkS(cls,t){const s=document.createElement('div');s.className=`stamp ${cls}`;s.textContent=t;return s;}
 
 // ── Drag ─────────────────────────────────────────────────
 let dr=false,sx=0,sy=0,cx=0,cy=0;
 function attachDrag(card){
   if(!card)return;
-  const start=(x,y)=>{dr=true;sx=cx=x;sy=cy=y;card.style.transition='none';};
-  const move=(x,y)=>{
-    if(!dr)return;cx=x;cy=y;
-    const dx=cx-sx,dy=cy-sy;
+  const S=(x,y)=>{dr=true;sx=cx=x;sy=cy=y;card.style.transition='none';};
+  const M=(x,y)=>{
+    if(!dr)return;cx=x;cy=y;const dx=cx-sx,dy=cy-sy;
     card.style.transform=`translate(${dx}px,${dy}px) rotate(${dx*.07}deg)`;
     card.querySelector('.s-keep').style.opacity=Math.max(0,dx/70);
     card.querySelector('.s-del').style.opacity=Math.max(0,-dx/70);
     card.querySelector('.s-skip').style.opacity=Math.max(0,-dy/70)*(Math.abs(dx)<50?1:0);
   };
-  const end=()=>{
-    if(!dr)return;dr=false;
-    const dx=cx-sx,dy=cy-sy;card.style.transition='';
+  const E=()=>{
+    if(!dr)return;dr=false;const dx=cx-sx,dy=cy-sy;card.style.transition='';
     if(dx>85)doSwipe('keep');
     else if(dx<-85)doSwipe('del');
     else if(dy<-85&&Math.abs(dx)<55)doSwipe('skip');
     else{card.style.transform='';card.querySelectorAll('.stamp').forEach(s=>s.style.opacity=0);}
   };
-  card.addEventListener('touchstart',e=>{const t=e.touches[0];start(t.clientX,t.clientY);},{passive:true});
-  card.addEventListener('touchmove',e=>{const t=e.touches[0];move(t.clientX,t.clientY);e.preventDefault();},{passive:false});
-  card.addEventListener('touchend',end);
-  card.addEventListener('mousedown',e=>start(e.clientX,e.clientY));
-  window.addEventListener('mousemove',e=>{if(dr)move(e.clientX,e.clientY);});
-  window.addEventListener('mouseup',()=>{if(dr)end();});
+  card.addEventListener('touchstart',e=>{const t=e.touches[0];S(t.clientX,t.clientY);},{passive:true});
+  card.addEventListener('touchmove',e=>{const t=e.touches[0];M(t.clientX,t.clientY);e.preventDefault();},{passive:false});
+  card.addEventListener('touchend',E);
+  card.addEventListener('mousedown',e=>S(e.clientX,e.clientY));
+  window.addEventListener('mousemove',e=>{if(dr)M(e.clientX,e.clientY);});
+  window.addEventListener('mouseup',()=>{if(dr)E();});
 }
 
 // ── Swipe ────────────────────────────────────────────────
@@ -445,20 +379,23 @@ async function doSwipe(action){
   history.push({img,action});
   card.classList.add(action==='keep'?'fly-r':action==='del'?'fly-l':'fly-u');
   if(action==='keep'){
-    toast('💚 Conservada','k');
-    meta.kept.add(img.id);await saveMeta();
+    toast('💚 Conservada','k');meta.kept.add(img.id);await saveMeta();
   }else if(action==='del'){
     toast('🗑 Eliminada','d');
-    meta.deleted[img.id]={id:img.id,name:img.name,blobUrl:img.blobUrl,
-      fullPath:img.fullPath,deletedAt:Date.now(),expiresAt:Date.now()+RETAIN_MS};
-    await saveMeta();updateBadge();
-    // Delete the actual file
-    if(CAP&&img.fullPath){
-      try{await Media.deleteMedia({identifier:img.id});}catch(e){console.warn('delete:',e);}
+    // Try to delete via MediaStore
+    if(CAP){
+      try{
+        await CMS.deleteMedia({id:img.id});
+      }catch(e){
+        console.warn('Delete warn:',e);
+        // Even if native delete fails, record in trash
+      }
     }
+    meta.deleted[img.id]={id:img.id,name:img.name,uri:img.uri,
+      deletedAt:Date.now(),expiresAt:Date.now()+RETAIN_MS};
+    await saveMeta();updateBadge();
   }else{
-    toast('⏭ Saltada','s');
-    meta.skipped.add(img.id);await saveMeta();
+    toast('⏭ Saltada','s');meta.skipped.add(img.id);await saveMeta();
   }
   card.addEventListener('animationend',()=>{idx++;render();},{once:true});
 }
@@ -469,95 +406,74 @@ async function doUndo(){
   if(action==='keep')meta.kept.delete(img.id);
   if(action==='skip')meta.skipped.delete(img.id);
   if(action==='del'){
-    // Can't restore a deleted file from gallery, but remove from deleted list
     delete meta.deleted[img.id];updateBadge();
-    toast('⚠ Foto ya eliminada del dispositivo','d');
-  }else{
-    toast('↩️ Deshecho','o');
-  }
-  await saveMeta();
-  idx=Math.max(0,idx-1);
-  render();
+    toast('⚠ La foto ya fue eliminada del dispositivo','d');
+  }else toast('↩️ Deshecho','o');
+  await saveMeta();idx=Math.max(0,idx-1);render();
 }
 
 // ── Buttons ──────────────────────────────────────────────
-document.getElementById('keep-btn').onclick=()=>doSwipe('keep');
-document.getElementById('del-btn').onclick=()=>doSwipe('del');
-document.getElementById('skip-btn').onclick=()=>doSwipe('skip');
-document.getElementById('undo-btn').onclick=doUndo;
-document.getElementById('reload-btn').onclick=async()=>{
-  meta.kept=new Set();meta.skipped=new Set();await saveMeta();
-  await boot();
+document.getElementById('pbtn').onclick=requestAndLoad;
+document.getElementById('sbtn').onclick=requestAndLoad;
+document.getElementById('kbtn').onclick=()=>doSwipe('keep');
+document.getElementById('dbtn').onclick=()=>doSwipe('del');
+document.getElementById('xsbtn').onclick=()=>doSwipe('skip');
+document.getElementById('ubtn').onclick=doUndo;
+document.getElementById('rbtn').onclick=async()=>{
+  meta.kept=new Set();meta.skipped=new Set();await saveMeta();await boot();
 };
 
 // ── Trash ────────────────────────────────────────────────
-document.getElementById('trash-btn').onclick=openTrash;
-document.getElementById('xtrash').onclick=closeTrash;
-document.getElementById('xtrash2').onclick=closeTrash;
-document.getElementById('tsheet').addEventListener('click',e=>{
-  if(e.target===document.getElementById('tsheet'))closeTrash();
-});
-
-function openTrash(){document.getElementById('tsheet').classList.add('on');renderTrash();}
-function closeTrash(){document.getElementById('tsheet').classList.remove('on');}
-
+document.getElementById('tbtn').onclick=openT;
+document.getElementById('xt').onclick=closeT;
+document.getElementById('xt2').onclick=closeT;
+document.getElementById('tsheet').addEventListener('click',e=>{if(e.target===document.getElementById('tsheet'))closeT();});
+function openT(){document.getElementById('tsheet').classList.add('on');renderTrash();}
+function closeT(){document.getElementById('tsheet').classList.remove('on');}
 function renderTrash(){
   const body=document.getElementById('tbody');
   const items=Object.values(meta.deleted)
     .map(v=>({...v,daysLeft:Math.max(0,Math.ceil((v.expiresAt-Date.now())/86_400_000))}))
     .sort((a,b)=>b.deletedAt-a.deletedAt);
   document.getElementById('tsub').textContent=items.length?`· ${items.length} foto${items.length>1?'s':''}` :'';
-  if(!items.length){body.innerHTML='<div class="tempty"><span>🧹</span>La papelera está vacía</div>';return;}
+  if(!items.length){body.innerHTML='<div class="tem"><span>🧹</span>La papelera está vacía</div>';return;}
   const grid=document.createElement('div');grid.className='tgrid';
   items.forEach(item=>{
-    const card=document.createElement('div');card.className='tc';
+    const c=document.createElement('div');c.className='tc';
     const dc=item.daysLeft<=1?'dr':'';
-    card.innerHTML=`<img src="${esc(item.blobUrl||'')}" alt="${esc(item.name)}">
+    c.innerHTML=`<img src="${esc(item.uri||'')}" alt="${esc(item.name)}">
       <div class="ti">
         <div class="tn">${esc(item.name)}</div>
         <div class="td ${dc}">${item.daysLeft<=0?'Expira hoy':`Expira en ${item.daysLeft}d`}</div>
-        <div class="td" style="color:var(--del);font-size:.6rem;">⚠ Foto eliminada del dispositivo</div>
+        <div class="td" style="color:var(--del);font-size:.6rem;">Eliminada del dispositivo</div>
       </div>`;
-    grid.appendChild(card);
+    grid.appendChild(c);
   });
   body.innerHTML='';body.appendChild(grid);
 }
-
-document.getElementById('purge-btn').onclick=async()=>{
-  const count=Object.keys(meta.deleted).length;
-  if(!count){toast('La papelera ya está vacía','');return;}
-  if(!confirm(`¿Limpiar el registro de ${count} foto${count>1?'s':''} eliminadas?`))return;
+document.getElementById('purgebtn').onclick=async()=>{
+  const n=Object.keys(meta.deleted).length;
+  if(!n){toast('La papelera ya está vacía','');return;}
+  if(!confirm(`¿Limpiar el registro de ${n} foto${n>1?'s':''}?`))return;
   meta.deleted={};await saveMeta();
-  toast(`🔥 Registro limpiado`,'d');updateBadge();renderTrash();
+  toast('🔥 Registro limpiado','d');updateBadge();renderTrash();
 };
 
 // ── Helpers ──────────────────────────────────────────────
 function showState(s){
-  document.getElementById('loader').style.display  =s==='loader'?'flex':'none';
-  document.getElementById('perm').style.display    =s==='perm'  ?'flex':'none';
-  document.getElementById('deck').style.display    =s==='deck'  ?'flex':'none';
-  document.getElementById('actions').style.display =s==='deck'  ?'flex':'none';
-  document.getElementById('empty').style.display   =s==='empty' ?'flex':'none';
+  ['loader','perm','deck','actions','empty'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(id==='actions')el.style.display=s==='deck'?'flex':'none';
+    else el.style.display=(id===s)?'flex':'none';
+  });
 }
-function setMsg(m){document.getElementById('loader-msg').textContent=m;}
-function updateProgress(done,tot){
-  document.getElementById('pb').style.width=(tot>0?Math.round(done/tot*100):0)+'%';
-}
-function updatePill(left){
-  document.getElementById('s-left').textContent=left??0;
-  document.getElementById('s-kept').textContent=meta.kept.size;
-}
-function updateBadge(){
-  const n=Object.keys(meta.deleted).length;
-  const b=document.getElementById('badge');
-  b.textContent=n>99?'99+':n;n>0?b.classList.add('on'):b.classList.remove('on');
-}
-function toast(msg,cls){
-  const t=document.createElement('div');t.className=`toast ${cls}`;t.textContent=msg;
-  document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),2700);
-}
+function setMsg(m){document.getElementById('lmsg').textContent=m;}
+function updateProgress(d,t){document.getElementById('pb').style.width=(t>0?Math.round(d/t*100):0)+'%';}
+function updatePill(l){document.getElementById('sl').textContent=l??0;document.getElementById('sk').textContent=meta.kept.size;}
+function updateBadge(){const n=Object.keys(meta.deleted).length;const b=document.getElementById('badge');b.textContent=n>99?'99+':n;n>0?b.classList.add('on'):b.classList.remove('on');}
+function toast(msg,cls){const t=document.createElement('div');t.className=`toast ${cls}`;t.textContent=msg;document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),2700);}
 function fmtSize(b){if(!b)return'';if(b>1048576)return(b/1048576).toFixed(1)+' MB';return(b/1024).toFixed(0)+' KB';}
-function fmtDate(ts){if(!ts)return'';const d=new Date(ts*1000||ts);return d.toLocaleDateString('es',{day:'2-digit',month:'short',year:'2-digit'});}
+function fmtDate(ts){if(!ts)return'';try{const d=new Date(ts>1e10?ts:ts*1000);return d.toLocaleDateString('es',{day:'2-digit',month:'short'});}catch{return'';}}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);}
 
 document.addEventListener('keydown',e=>{
