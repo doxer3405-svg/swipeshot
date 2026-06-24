@@ -321,8 +321,8 @@ function render(){
   showState('deck');
   updateProgress(idx,images.length);
   updatePill(images.length-idx);
-  [...images.slice(idx,idx+4)].reverse().forEach((img,i)=>{
-    deck.appendChild(buildCard(img,i===Math.min(images.length-idx,4)-1));
+  images.slice(idx,idx+4).forEach((img,i)=>{
+    deck.appendChild(buildCard(img,i===0));
   });
   attachDrag(deck.querySelector('.top'));
 }
@@ -388,13 +388,19 @@ async function doSwipe(action){
     toast('💚 Conservada','k');meta.kept.add(img.id);await saveMeta();
   }else if(action==='del'){
     toast('🗑 Eliminada','d');
-    // Try to delete via MediaStore
-    if(CAP){
+    // Borrado real del dispositivo via plugin nativo propio (MediaDelete).
+    // CMS.deleteMedia no existe en @odion-cloud/capacitor-mediastore, por eso
+    // nunca borraba nada real — ver native-MediaDeletePlugin.kt.
+    const MD = window.Capacitor?.Plugins?.MediaDelete;
+    let deletedOk = false;
+    if(CAP && MD){
       try{
-        await CMS.deleteMedia({id:img.id});
+        const r = await MD.deleteMedia({uri:img.uri});
+        deletedOk = !!r?.success;
+        if(!deletedOk) toast('⚠ No se confirmó el borrado','d');
       }catch(e){
         console.warn('Delete warn:',e);
-        // Even if native delete fails, record in trash
+        toast('⚠ No se pudo borrar del dispositivo','d');
       }
     }
     meta.deleted[img.id]={id:img.id,name:img.name,uri:img.uri,
