@@ -49,12 +49,31 @@ jobs:
 
       - name: Update AndroidManifest permissions
         run: |
-          MANIFEST="android/app/src/main/AndroidManifest.xml"
-          # Añadir permisos Android 13/14 si no existen
-          if ! grep -q "READ_MEDIA_IMAGES" "$MANIFEST"; then
-            sed -i 's|<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"|<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"|g' "$MANIFEST"
-            sed -i 's|</manifest>|    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />\n    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />\n</manifest>|g' "$MANIFEST"
-          fi
+          python3 << 'PYEOF'
+          import re
+          path = "android/app/src/main/AndroidManifest.xml"
+          with open(path, "r") as f:
+              content = f.read()
+          content = content.replace(
+              'android:name="android.permission.READ_EXTERNAL_STORAGE" />',
+              'android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />'
+          )
+          content = content.replace(
+              'android:maxSdkVersion="32" android:maxSdkVersion="32"',
+              'android:maxSdkVersion="32"'
+          )
+          perms = [
+              'android.permission.READ_MEDIA_IMAGES',
+              'android.permission.READ_MEDIA_VISUAL_USER_SELECTED',
+          ]
+          for perm in perms:
+              if perm not in content:
+                  line = f'    <uses-permission android:name="{perm}" />\n'
+                  content = content.replace("</manifest>", line + "</manifest>")
+          with open(path, "w") as f:
+              f.write(content)
+          print("OK:", path)
+          PYEOF
 
       - name: Grant execute permission to gradlew
         working-directory: android
