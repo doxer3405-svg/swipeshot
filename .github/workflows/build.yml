@@ -47,33 +47,28 @@ jobs:
       - name: Capacitor sync
         run: npx cap sync android
 
-      - name: Patch AndroidManifest — Android 15 permissions
+      - name: Patch AndroidManifest
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
-          # Remove old storage permissions if any, then inject correct ones
           sed -i '/<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE/d' "$MANIFEST"
           sed -i '/<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE/d' "$MANIFEST"
           sed -i '/<uses-permission android:name="android.permission.READ_MEDIA/d' "$MANIFEST"
-          sed -i 's|</manifest>|    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>\n</manifest>|' "$MANIFEST"
-          echo "=== AndroidManifest.xml ==="
+          sed -i 's|</manifest>|    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>\n    <queries>\n        <intent>\n            <action android:name="android.intent.action.GET_CONTENT"/>\n        </intent>\n    </queries>\n</manifest>|' "$MANIFEST"
+          echo "=== Manifest ==="
           cat "$MANIFEST"
 
-      - name: Patch build.gradle — target SDK 34
+      - name: Patch build.gradle
         run: |
           GRADLE="android/app/build.gradle"
           sed -i 's/compileSdkVersion .*/compileSdkVersion 34/' "$GRADLE"
           sed -i 's/targetSdkVersion .*/targetSdkVersion 34/' "$GRADLE"
           sed -i 's/minSdkVersion .*/minSdkVersion 26/' "$GRADLE"
-          echo "=== build.gradle ==="
-          cat "$GRADLE"
 
       - name: Build Debug APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
-        env:
-          JAVA_HOME: ${{ env.JAVA_HOME }}
 
       - name: Rename APK
         run: |
@@ -94,15 +89,12 @@ jobs:
           tag_name: v1.0.${{ github.run_number }}
           name: "SwipeShot v1.0.${{ github.run_number }}"
           body: |
-            ## 🎴 SwipeShot APK — Android 13/14/15
+            ## 🎴 SwipeShot — Todas las fotos automáticamente
 
-            ### Instalar
             1. Descarga el `.apk`
-            2. **Ajustes → Aplicaciones → Instalar apps desconocidas** ✓
-            3. Abre e instala
-
-            ### Al abrir por primera vez
-            Acepta el permiso de **Fotos y videos** cuando aparezca el diálogo.
+            2. Instala (permite fuentes desconocidas)
+            3. Acepta permiso de fotos al abrir
+            4. ¡Todas tus fotos aparecen solas!
           files: output/SwipeShot-v${{ github.run_number }}.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

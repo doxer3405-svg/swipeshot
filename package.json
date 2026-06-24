@@ -9,9 +9,8 @@
   "dependencies": {
     "@capacitor/android": "^6.0.0",
     "@capacitor/core": "^6.0.0",
-    "@capacitor/camera": "^6.0.0",
     "@capacitor/preferences": "^6.0.0",
-    "@capacitor/filesystem": "^6.0.0"
+    "@capacitor-community/media": "^6.0.0"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.0.0"
