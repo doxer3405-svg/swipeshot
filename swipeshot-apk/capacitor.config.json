@@ -1,0 +1,15 @@
+{
+  "appId": "com.swipeshot.app",
+  "appName": "SwipeShot",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "Filesystem": {
+      "iosScheme": "capacitor"
+    }
+  }
+}

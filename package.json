@@ -1,0 +1,19 @@
+{
+  "name": "swipeshot",
+  "version": "1.0.0",
+  "description": "Tinder-style photo cleaner for Android",
+  "scripts": {
+    "build": "node build.js",
+    "sync": "npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/camera": "^6.0.0",
+    "@capacitor/preferences": "^6.0.0",
+    "@capacitor/filesystem": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}
