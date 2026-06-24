@@ -247,13 +247,19 @@ async function loadPhotos(){
         const id=m.id??m.identifier??m.path;
         return !del.has(id)&&!meta.kept.has(id)&&!meta.skipped.has(id);
       })
-      .map(m=>({
-        id:    m.id??m.identifier??m.path,
-        name:  m.name??m.fileName??m.displayName??'foto.jpg',
-        size:  m.size??0,
-        uri:   m.uri??m.contentUri??m.path??'',
-        date:  m.dateAdded??m.creationDate??0,
-      }));
+      .map(m=>{
+        const rawUri = m.uri??m.contentUri??m.path??'';
+        return {
+          id:    m.id??m.identifier??m.path,
+          name:  m.name??m.fileName??m.displayName??'foto.jpg',
+          size:  m.size??0,
+          uri:   rawUri,
+          // displaySrc is what we actually put in <img src>. content:// / file:// URIs
+          // are not loadable directly inside the WebView, they must be converted.
+          displaySrc: (window.Capacitor?.convertFileSrc ? window.Capacitor.convertFileSrc(rawUri) : rawUri),
+          date:  m.dateAdded??m.creationDate??0,
+        };
+      });
 
     images.sort((a,b)=>b.date-a.date);
     idx=0;history=[];
@@ -328,7 +334,7 @@ function buildCard(img,isTop){
   el.className='card-img blur';el.draggable=false;
   el.onload=()=>el.classList.remove('blur');
   el.onerror=()=>{el.style.background='#1a1a2e';el.classList.remove('blur');};
-  el.src=img.uri;
+  el.src=img.displaySrc||img.uri;
   const ov=document.createElement('div');ov.className='card-ov';
   const ctr=document.createElement('div');ctr.className='card-ctr';
   ctr.textContent=`${idx+1}/${images.length}`;
@@ -392,6 +398,7 @@ async function doSwipe(action){
       }
     }
     meta.deleted[img.id]={id:img.id,name:img.name,uri:img.uri,
+      displaySrc:img.displaySrc,
       deletedAt:Date.now(),expiresAt:Date.now()+RETAIN_MS};
     await saveMeta();updateBadge();
   }else{
@@ -441,7 +448,8 @@ function renderTrash(){
   items.forEach(item=>{
     const c=document.createElement('div');c.className='tc';
     const dc=item.daysLeft<=1?'dr':'';
-    c.innerHTML=`<img src="${esc(item.uri||'')}" alt="${esc(item.name)}">
+    const thumb = item.displaySrc || (window.Capacitor?.convertFileSrc ? window.Capacitor.convertFileSrc(item.uri||'') : (item.uri||''));
+    c.innerHTML=`<img src="${esc(thumb)}" alt="${esc(item.name)}">
       <div class="ti">
         <div class="tn">${esc(item.name)}</div>
         <div class="td ${dc}">${item.daysLeft<=0?'Expira hoy':`Expira en ${item.daysLeft}d`}</div>
