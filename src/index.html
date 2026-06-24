@@ -230,9 +230,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:12p
 <script>
 'use strict';
 
-const CAP    = !!window.Capacitor?.isNativePlatform?.();
-const Prefs  = window.Capacitor?.Plugins?.Preferences;
-const Media  = window.Capacitor?.Plugins?.Media;
+const CAP        = !!window.Capacitor?.isNativePlatform?.();
+const Prefs      = window.Capacitor?.Plugins?.Preferences;
+// Nuevo plugin: @odion-cloud/capacitor-mediastore
+const MediaStore = window.Capacitor?.Plugins?.CapacitorMediastore;
 
 const META_KEY   = 'swipeshot_v3';
 const RETAIN_MS  = 7 * 86_400_000;
@@ -251,14 +252,23 @@ async function boot() {
 
   if (!CAP) { await demoBoot(); return; }
 
-  // Check/request permission via Media plugin
+  // Solicitar permisos con el nuevo plugin (Android 13/14+ compatible)
   try {
-    const perm = await Media.getMedias({ quantity: 1, thumbnailWidth: 10, thumbnailHeight: 10, thumbnailQuality: 10 });
-    // If we got here, permission already granted
-    await loadAllPhotos();
+    const perm = await MediaStore.requestPermissions();
+    // perm.readMedia puede ser: 'granted', 'limited' (Android 14 selección parcial), 'denied'
+    if (perm.readMedia === 'granted' || perm.readMedia === 'limited') {
+      await loadAllPhotos();
+    } else {
+      showState('perm');
+    }
   } catch(e) {
-    // No permission yet — show permission screen
-    showState('perm');
+    console.warn('Permission check error:', e);
+    // Si el método no existe, intentar cargar directamente
+    try {
+      await loadAllPhotos();
+    } catch(e2) {
+      showState('perm');
+    }
   }
 }
 
@@ -266,25 +276,34 @@ document.getElementById('perm-btn').onclick = async () => {
   showState('loader');
   setMsg('Solicitando permiso…');
   try {
-    await loadAllPhotos();
+    const perm = await MediaStore.requestPermissions();
+    if (perm.readMedia === 'granted' || perm.readMedia === 'limited') {
+      await loadAllPhotos();
+    } else {
+      toast('Permiso denegado. Ve a Ajustes → Aplicaciones → SwipeShot → Permisos', 'd');
+      showState('perm');
+    }
   } catch(e) {
-    toast('Permiso denegado. Ve a Ajustes → Aplicaciones → SwipeShot → Permisos', 'd');
-    showState('perm');
+    // Fallback: intentar cargar igualmente
+    try {
+      await loadAllPhotos();
+    } catch(e2) {
+      toast('Permiso denegado. Ve a Ajustes → Aplicaciones → SwipeShot → Permisos', 'd');
+      showState('perm');
+    }
   }
 };
 
-// ── Load all photos via @capacitor-community/media ────────
+// ── Load all photos via @odion-cloud/capacitor-mediastore ────────
 async function loadAllPhotos() {
   setMsg('Cargando tus fotos…');
   try {
-    // Get all photos from gallery
-    const result = await Media.getMedias({
-      quantity: 9999,
+    // Nuevo plugin API: getMedias con soporte MediaStore
+    const result = await MediaStore.getMedias({
+      types: 'images',
       thumbnailWidth: 400,
       thumbnailHeight: 600,
       thumbnailQuality: 80,
-      types: 'images',
-      albumIdentifier: undefined,
     });
 
     const mediaItems = result.medias ?? [];
@@ -293,14 +312,17 @@ async function loadAllPhotos() {
     const deletedSet = new Set(Object.keys(meta.deleted));
 
     images = mediaItems
-      .filter(m => !deletedSet.has(m.identifier) && !meta.kept.has(m.identifier) && !meta.skipped.has(m.identifier))
+      .filter(m => {
+        const id = m.identifier ?? m.id;
+        return id && !deletedSet.has(id) && !meta.kept.has(id) && !meta.skipped.has(id);
+      })
       .map(m => ({
-        id:        m.identifier,
-        name:      m.fileName ?? 'foto.jpg',
+        id:        m.identifier ?? m.id,
+        name:      m.fileName ?? m.name ?? 'foto.jpg',
         size:      m.size ?? 0,
-        blobUrl:   m.thumbnailPath ?? m.path,
-        fullPath:  m.path,
-        createdAt: m.creationDate,
+        blobUrl:   m.thumbnail ?? m.thumbnailPath ?? m.data ?? m.path,
+        fullPath:  m.data ?? m.path ?? m.fullPath,
+        createdAt: m.creationDate ?? m.modifiedAt ?? 0,
       }));
 
     // Sort newest first
@@ -452,9 +474,13 @@ async function doSwipe(action){
     meta.deleted[img.id]={id:img.id,name:img.name,blobUrl:img.blobUrl,
       fullPath:img.fullPath,deletedAt:Date.now(),expiresAt:Date.now()+RETAIN_MS};
     await saveMeta();updateBadge();
-    // Delete the actual file
-    if(CAP&&img.fullPath){
-      try{await Media.deleteMedia({identifier:img.id});}catch(e){console.warn('delete:',e);}
+    // Eliminar el archivo usando el nuevo plugin
+    if(CAP && img.id){
+      try{
+        await MediaStore.deleteMedia({ identifier: img.id });
+      }catch(e){
+        console.warn('delete error:', e);
+      }
     }
   }else{
     toast('⏭ Saltada','s');
@@ -469,7 +495,6 @@ async function doUndo(){
   if(action==='keep')meta.kept.delete(img.id);
   if(action==='skip')meta.skipped.delete(img.id);
   if(action==='del'){
-    // Can't restore a deleted file from gallery, but remove from deleted list
     delete meta.deleted[img.id];updateBadge();
     toast('⚠ Foto ya eliminada del dispositivo','d');
   }else{

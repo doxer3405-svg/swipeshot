@@ -1,100 +1,72 @@
-name: 🎴 Build SwipeShot APK
+name: Build SwipeShot APK
 
 on:
   push:
-    branches: [main, master]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build Debug APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
-      - name: Setup Java 17
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'temurin'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Install dependencies
+        run: npm install
 
-      - name: Accept Android licenses
-        run: yes | sdkmanager --licenses || true
-
-      - name: Install npm dependencies
-        run: npm ci
-
-      - name: Build web assets
-        run: npm run build
-
-      - name: Capacitor add android
+      - name: Copy web assets to Android
         run: |
-          if [ ! -d "android" ]; then
-            npx cap add android
-          fi
+          mkdir -p android/app/src/main/assets/public
+          cp src/index.html android/app/src/main/assets/public/index.html
 
-      - name: Capacitor sync
-        run: npx cap sync android
+      - name: Update capacitor.plugins.json
+        run: |
+          cat > android/app/src/main/assets/capacitor.plugins.json << 'EOF'
+          [
+            {
+              "pkg": "@capacitor/preferences",
+              "classpath": "com.capacitorjs.plugins.preferences.PreferencesPlugin"
+            },
+            {
+              "pkg": "@odion-cloud/capacitor-mediastore",
+              "classpath": "com.odion.capacitor.mediastore.CapacitorMediastorePlugin"
+            }
+          ]
+          EOF
 
-      - name: Patch AndroidManifest
+      - name: Update AndroidManifest permissions
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
-          sed -i '/<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE/d' "$MANIFEST"
-          sed -i '/<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE/d' "$MANIFEST"
-          sed -i '/<uses-permission android:name="android.permission.READ_MEDIA/d' "$MANIFEST"
-          sed -i 's|</manifest>|    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>\n    <queries>\n        <intent>\n            <action android:name="android.intent.action.GET_CONTENT"/>\n        </intent>\n    </queries>\n</manifest>|' "$MANIFEST"
-          echo "=== Manifest ==="
-          cat "$MANIFEST"
+          # Añadir permisos Android 13/14 si no existen
+          if ! grep -q "READ_MEDIA_IMAGES" "$MANIFEST"; then
+            sed -i 's|<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"|<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"|g' "$MANIFEST"
+            sed -i 's|</manifest>|    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />\n    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />\n</manifest>|g' "$MANIFEST"
+          fi
 
-      - name: Patch build.gradle
-        run: |
-          GRADLE="android/app/build.gradle"
-          sed -i 's/compileSdkVersion .*/compileSdkVersion 34/' "$GRADLE"
-          sed -i 's/targetSdkVersion .*/targetSdkVersion 34/' "$GRADLE"
-          sed -i 's/minSdkVersion .*/minSdkVersion 26/' "$GRADLE"
+      - name: Grant execute permission to gradlew
+        working-directory: android
+        run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
 
-      - name: Rename APK
-        run: |
-          mkdir -p output
-          cp android/app/build/outputs/apk/debug/app-debug.apk \
-             output/SwipeShot-v${{ github.run_number }}.apk
-
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: SwipeShot-APK-v${{ github.run_number }}
-          path: output/SwipeShot-v${{ github.run_number }}.apk
+          name: SwipeShot-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: "SwipeShot v1.0.${{ github.run_number }}"
-          body: |
-            ## 🎴 SwipeShot — Todas las fotos automáticamente
-
-            1. Descarga el `.apk`
-            2. Instala (permite fuentes desconocidas)
-            3. Acepta permiso de fotos al abrir
-            4. ¡Todas tus fotos aparecen solas!
-          files: output/SwipeShot-v${{ github.run_number }}.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
