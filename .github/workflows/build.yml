@@ -70,7 +70,7 @@ jobs:
           mkdir -p "$PKG_DIR"
 
           # 2. Copy the Kotlin plugin
-          cp native-MediaDeletePlugin.kt "$PKG_DIR/MediaDeletePlugin.kt"
+          cp native-MediaDeletePlugin.java "$PKG_DIR/MediaDeletePlugin.java"
           echo "✔ Plugin copiado a $PKG_DIR"
 
           # 3. Find MainActivity and register the plugin
