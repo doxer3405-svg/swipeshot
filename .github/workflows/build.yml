@@ -50,15 +50,11 @@ jobs:
       - name: Patch AndroidManifest — Android 13/14/15
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
-          # Remove duplicates
           sed -i '/<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE/d' "$MANIFEST"
           sed -i '/<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE/d' "$MANIFEST"
           sed -i '/<uses-permission android:name="android.permission.READ_MEDIA/d' "$MANIFEST"
           sed -i '/<uses-permission android:name="android.permission.READ_MEDIA_VISUAL/d' "$MANIFEST"
-          # Inject correct permissions before </manifest>
-          sed -i 's|</manifest>|    <!-- Android 6-12 -->\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>\n    <!-- Android 13+ -->\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <!-- Android 14+ partial access -->\n    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/>\n</manifest>|' "$MANIFEST"
-          echo "=== AndroidManifest.xml ==="
-          cat "$MANIFEST"
+          sed -i 's|</manifest>|    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/>\n</manifest>|' "$MANIFEST"
 
       - name: Patch build.gradle — SDK versions
         run: |
@@ -66,8 +62,33 @@ jobs:
           sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' "$GRADLE"
           sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' "$GRADLE"
           sed -i 's/minSdkVersion .*/minSdkVersion 26/' "$GRADLE"
-          echo "=== build.gradle ==="
-          grep -E "compileSdk|targetSdk|minSdk" "$GRADLE"
+
+      - name: Install MediaDeletePlugin — copy + register
+        run: |
+          # 1. Find the app package directory
+          PKG_DIR="android/app/src/main/java/com/swipeshot/app"
+          mkdir -p "$PKG_DIR"
+
+          # 2. Copy the Kotlin plugin
+          cp native-MediaDeletePlugin.kt "$PKG_DIR/MediaDeletePlugin.kt"
+          echo "✔ Plugin copiado a $PKG_DIR"
+
+          # 3. Find MainActivity and register the plugin
+          MAIN=$(find android -name "MainActivity.kt" -o -name "MainActivity.java" | head -1)
+          echo "MainActivity: $MAIN"
+
+          if [[ "$MAIN" == *.kt ]]; then
+            # Kotlin: add import and register
+            sed -i '/^package/a import com.swipeshot.app.MediaDeletePlugin' "$MAIN"
+            sed -i 's/class MainActivity : BridgeActivity() {/class MainActivity : BridgeActivity() {\n    override fun onCreate(savedInstanceState: android.os.Bundle?) {\n        registerPlugin(MediaDeletePlugin::class.java)\n        super.onCreate(savedInstanceState)\n    }/' "$MAIN"
+          else
+            # Java
+            sed -i '/^package/a import com.swipeshot.app.MediaDeletePlugin;' "$MAIN"
+            sed -i 's/public class MainActivity extends BridgeActivity {/public class MainActivity extends BridgeActivity {\n    @Override\n    public void onCreate(android.os.Bundle savedInstanceState) {\n        registerPlugin(MediaDeletePlugin.class);\n        super.onCreate(savedInstanceState);\n    }/' "$MAIN"
+          fi
+
+          echo "=== MainActivity ==="
+          cat "$MAIN"
 
       - name: Build Debug APK
         run: |
@@ -94,12 +115,12 @@ jobs:
           tag_name: v1.0.${{ github.run_number }}
           name: "SwipeShot v1.0.${{ github.run_number }}"
           body: |
-            ## 🎴 SwipeShot — Android 13/14/15
+            ## 🎴 SwipeShot — con borrado real Android 15
 
             1. Descarga el `.apk`
             2. Instala (permite fuentes desconocidas)
-            3. Acepta permiso de fotos al abrir
-            4. ¡Todas tus fotos aparecen automáticamente!
+            3. Al eliminar una foto → confirma el diálogo del sistema
+            4. La foto se borra definitivamente del dispositivo
           files: output/SwipeShot-v${{ github.run_number }}.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
