@@ -35,77 +35,14 @@ jobs:
           sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' "$G"
           sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' "$G"
           sed -i 's/minSdkVersion .*/minSdkVersion 26/' "$G"
-      - name: Add MediaDeletePlugin
+      - name: Write MediaDeletePlugin
         run: |
           MAIN=$(find android -name "MainActivity.java" | head -1)
+          python3 write_plugin.py "$MAIN"
           PKG=$(grep -m1 "^package" "$MAIN" | sed 's/package //;s/;//')
-          DIR="android/app/src/main/java/$(echo $PKG | tr '.' '/')"
-          echo "PKG=$PKG"
-
-          cat > "$DIR/MediaDeletePlugin.java" << JEOF
-package $PKG;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
-import android.provider.MediaStore;
-import com.getcapacitor.JSObject;
-import com.getcapacitor.Plugin;
-import com.getcapacitor.PluginCall;
-import com.getcapacitor.PluginMethod;
-import com.getcapacitor.annotation.CapacitorPlugin;
-import java.util.Collections;
-
-@CapacitorPlugin(name = "MediaDelete")
-public class MediaDeletePlugin extends Plugin {
-
-    private static final int REQ_DELETE = 42;
-    private PluginCall savedCall;
-
-    @PluginMethod
-    public void deleteMedia(PluginCall call) {
-        String uriStr = call.getString("uri");
-        if (uriStr == null) { call.reject("no uri"); return; }
-        Uri uri = Uri.parse(uriStr);
-        savedCall = call;
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                android.app.PendingIntent pi = MediaStore.createDeleteRequest(
-                    getContext().getContentResolver(),
-                    Collections.singletonList(uri));
-                getActivity().startIntentSenderForResult(
-                    pi.getIntentSender(), REQ_DELETE, new Intent(), 0, 0, 0);
-            } else {
-                int n = getContext().getContentResolver().delete(uri, null, null);
-                JSObject r = new JSObject(); r.put("success", n > 0); call.resolve(r);
-                savedCall = null;
-            }
-        } catch (Exception e) {
-            call.reject(e.getMessage()); savedCall = null;
-        }
-    }
-
-    @Override
-    protected void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
-        super.handleOnActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_DELETE && savedCall != null) {
-            JSObject r = new JSObject();
-            r.put("success", resultCode == Activity.RESULT_OK);
-            savedCall.resolve(r);
-            savedCall = null;
-        }
-    }
-}
-JEOF
-
           sed -i "s|^package.*;|&\nimport $PKG.MediaDeletePlugin;|" "$MAIN"
           sed -i '/super.onCreate/i\        registerPlugin(MediaDeletePlugin.class);' "$MAIN"
-          echo "=== MainActivity ==="
-          cat "$MAIN"
-          echo "=== Plugin ==="
-          cat "$DIR/MediaDeletePlugin.java"
-
+          echo "=== MainActivity ===" && cat "$MAIN"
       - name: Build APK
         run: cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon
       - name: Upload
