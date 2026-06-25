@@ -1,126 +1,58 @@
-name: 🎴 Build SwipeShot APK
-
+name: Build SwipeShot APK
 on:
   push:
     branches: [main, master]
   workflow_dispatch:
-
 jobs:
   build:
-    name: Build Debug APK
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept Android licenses
-        run: yes | sdkmanager --licenses || true
-
-      - name: Install npm dependencies
-        run: npm ci
-
-      - name: Build web assets
-        run: npm run build
-
-      - name: Capacitor add android
+      - uses: android-actions/setup-android@v3
+      - run: yes | sdkmanager --licenses || true
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap add android || true
+      - run: npx cap sync android
+      - name: Patch Manifest
         run: |
-          if [ ! -d "android" ]; then
-            npx cap add android
-          fi
-
-      - name: Capacitor sync
-        run: npx cap sync android
-
-      - name: Patch AndroidManifest — Android 13/14/15
+          M="android/app/src/main/AndroidManifest.xml"
+          sed -i 's|</manifest>|<uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/><uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/><uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/><uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/></manifest>|' "$M"
+      - name: Patch Gradle
         run: |
-          MANIFEST="android/app/src/main/AndroidManifest.xml"
-          sed -i '/<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE/d' "$MANIFEST"
-          sed -i '/<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE/d' "$MANIFEST"
-          sed -i '/<uses-permission android:name="android.permission.READ_MEDIA/d' "$MANIFEST"
-          sed -i '/<uses-permission android:name="android.permission.READ_MEDIA_VISUAL/d' "$MANIFEST"
-          sed -i 's|</manifest>|    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>\n    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/>\n</manifest>|' "$MANIFEST"
-
-      - name: Patch build.gradle — SDK versions
+          G="android/app/build.gradle"
+          sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' "$G"
+          sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' "$G"
+          sed -i 's/minSdkVersion .*/minSdkVersion 26/' "$G"
+      - name: Add MediaDeletePlugin
         run: |
-          GRADLE="android/app/build.gradle"
-          sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' "$GRADLE"
-          sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' "$GRADLE"
-          sed -i 's/minSdkVersion .*/minSdkVersion 26/' "$GRADLE"
-
-      - name: Install MediaDeletePlugin — copy + register
-        run: |
-          # 1. Find the app package directory
-          PKG_DIR="android/app/src/main/java/com/swipeshot/app"
-          mkdir -p "$PKG_DIR"
-
-          # 2. Copy the Kotlin plugin
-          cp native-MediaDeletePlugin.java "$PKG_DIR/MediaDeletePlugin.java"
-          echo "✔ Plugin copiado a $PKG_DIR"
-
-          # 3. Find MainActivity and register the plugin
-          MAIN=$(find android -name "MainActivity.kt" -o -name "MainActivity.java" | head -1)
-          echo "MainActivity: $MAIN"
-
-          if [[ "$MAIN" == *.kt ]]; then
-            # Kotlin: add import and register
-            sed -i '/^package/a import com.swipeshot.app.MediaDeletePlugin' "$MAIN"
-            sed -i 's/class MainActivity : BridgeActivity() {/class MainActivity : BridgeActivity() {\n    override fun onCreate(savedInstanceState: android.os.Bundle?) {\n        registerPlugin(MediaDeletePlugin::class.java)\n        super.onCreate(savedInstanceState)\n    }/' "$MAIN"
-          else
-            # Java
-            sed -i '/^package/a import com.swipeshot.app.MediaDeletePlugin;' "$MAIN"
-            sed -i 's/public class MainActivity extends BridgeActivity {/public class MainActivity extends BridgeActivity {\n    @Override\n    public void onCreate(android.os.Bundle savedInstanceState) {\n        registerPlugin(MediaDeletePlugin.class);\n        super.onCreate(savedInstanceState);\n    }/' "$MAIN"
-          fi
-
-          echo "=== MainActivity ==="
-          cat "$MAIN"
-
-      - name: Build Debug APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-
-      - name: Rename APK
-        run: |
-          mkdir -p output
-          cp android/app/build/outputs/apk/debug/app-debug.apk \
-             output/SwipeShot-v${{ github.run_number }}.apk
-
-      - name: Upload APK artifact
+          MAIN=$(find android -name "MainActivity.java" | head -1)
+          PKG=$(grep -m1 "^package" "$MAIN" | sed 's/package //;s/;//')
+          DIR="android/app/src/main/java/$(echo $PKG | tr '.' '/')"
+          printf 'package %s;\nimport android.app.Activity;\nimport android.content.Intent;\nimport android.net.Uri;\nimport android.os.Build;\nimport android.provider.MediaStore;\nimport com.getcapacitor.JSObject;\nimport com.getcapacitor.Plugin;\nimport com.getcapacitor.PluginCall;\nimport com.getcapacitor.PluginMethod;\nimport com.getcapacitor.annotation.ActivityCallback;\nimport com.getcapacitor.annotation.CapacitorPlugin;\nimport java.util.Collections;\n@CapacitorPlugin(name="MediaDelete")\npublic class MediaDeletePlugin extends Plugin {\nprivate PluginCall pendingCall=null;\n@PluginMethod\npublic void deleteMedia(PluginCall call){\nString u=call.getString("uri");\nif(u==null){call.reject("no uri");return;}\nUri uri=Uri.parse(u);\ntry{\nif(Build.VERSION.SDK_INT>=Build.VERSION_CODES.R){\nandroid.app.PendingIntent pi=MediaStore.createDeleteRequest(getContext().getContentResolver(),Collections.singletonList(uri));\npendingCall=call;\nstartIntentSenderForResult(pi.getIntentSender(),"deleteResult",new Intent(),0,0,0,null);\n}else{\nint r=getContext().getContentResolver().delete(uri,null,null);\nJSObject ret=new JSObject();ret.put("success",r>0);call.resolve(ret);\n}\n}catch(android.app.RecoverableSecurityException e){\npendingCall=call;\ntry{startIntentSenderForResult(e.getUserAction().getActionIntent().getIntentSender(),"deleteResult",new Intent(),0,0,0,null);}catch(Exception ex){call.reject(ex.getMessage());}\n}catch(Exception e){call.reject(e.getMessage());}\n}\n@ActivityCallback\nprivate void deleteResult(PluginCall call,com.getcapacitor.PluginResult result){\nif(call==null)return;\nJSObject ret=new JSObject();ret.put("success",result.getResultCode()==Activity.RESULT_OK);call.resolve(ret);pendingCall=null;\n}\n}\n' "$PKG" > "$DIR/MediaDeletePlugin.java"
+          sed -i "s|^package.*;|&\nimport $PKG.MediaDeletePlugin;|" "$MAIN"
+          sed -i '/super.onCreate/i\        registerPlugin(MediaDeletePlugin.class);' "$MAIN"
+      - name: Build APK
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: SwipeShot-APK-v${{ github.run_number }}
-          path: output/SwipeShot-v${{ github.run_number }}.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
-
-      - name: Create GitHub Release
+      - name: Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: "SwipeShot v1.0.${{ github.run_number }}"
-          body: |
-            ## 🎴 SwipeShot — con borrado real Android 15
-
-            1. Descarga el `.apk`
-            2. Instala (permite fuentes desconocidas)
-            3. Al eliminar una foto → confirma el diálogo del sistema
-            4. La foto se borra definitivamente del dispositivo
-          files: output/SwipeShot-v${{ github.run_number }}.apk
+          name: SwipeShot v1.0.${{ github.run_number }}
+          files: android/app/build/outputs/apk/debug/app-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
