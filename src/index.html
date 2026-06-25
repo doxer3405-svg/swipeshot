@@ -388,23 +388,11 @@ async function doSwipe(action){
     toast('💚 Conservada','k');meta.kept.add(img.id);await saveMeta();
   }else if(action==='del'){
     toast('🗑 Eliminada','d');
-    // Borrar usando Filesystem de Capacitor (funciona en Android 15)
     if(CAP){
       try{
-        const FS = window.Capacitor.Plugins.Filesystem;
-        // Convertir content:// URI a path legible
-        const path = img.uri.replace('content://com.android.externalstorage.documents/document/primary:','')
-                             .replace('content://media/external/images/media/','');
-        await FS.deleteFile({ path: img.uri });
-      }catch(e){
-        // Si falla con URI directa, intentar con path relativo
-        try{
-          const FS = window.Capacitor.Plugins.Filesystem;
-          await FS.deleteFile({ path: img.fullPath || img.uri });
-        }catch(e2){
-          console.warn('Delete warn:',e2);
-        }
-      }
+        const MD = window.Capacitor.Plugins.MediaDelete;
+        if(MD) await MD.deleteMedia({uri: img.uri});
+      }catch(e){ console.warn('delete:',e); }
     }
     meta.deleted[img.id]={id:img.id,name:img.name,uri:img.uri,
       displaySrc:img.displaySrc||img.uri,
